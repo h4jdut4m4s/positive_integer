@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<h1>Pick a positive integer, the smallest wins! </h1>
+
+<h2>Number of round: {{session['round']}}</h2>
+
+<h3>Refresh the page to start a new round!</h3>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Remote command UI</title>
+</head>
+<body>
+<div align="left">
+<form action="/game" method="POST">
+    {% for item in data %}
+    <tr>
+        <td>{{item[0]}}:</td>
+        <td>{{item[1]}}</td>
+        <br>
+    </tr>
+    {% endfor %}
+    <br>
+    <input type="submit" value="Submit numbers">
+</form>
+</div>
+<div align="left">
+<form action="/add" method="POST">
+    <br>
+    Add new player:
+    <input name="add_player">
+    <br>
+    Add new number to the player:
+    <input name="number">
+    <br>
+    <input type="submit" value="Add">
+    {% for message in get_flashed_messages() %}
+        <p>{{ message  }}</p>
+    {% endfor %}
+    <br>
+</form>
+</div>
+<br>
+<br>
+<br>
+<form action="/results" method="POST">
+<input type="submit" value="Round results">
+</form>
+<br>
+</body>
+</html>
