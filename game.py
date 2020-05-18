@@ -19,7 +19,8 @@ def index():
     data = cur.fetchall()
     return render_template('index.html', data=data)
 
-@app.route("/add", methods=["GET",'POST'])
+
+@app.route("/add", methods=["GET", "POST"])
 def add_player():
     if request.method == "POST":
         add_player_name = request.form['add_player']
@@ -41,34 +42,46 @@ def add_player():
         return redirect('/positive_integer/v1/games/positiveInteger')
 
 
-@app.route("/game", methods=["GET",'POST'])
+@app.route("/game", methods=["GET", "POST"])
 def player_one():
-        if request.method == "POST":
-            conn = sqlite3.connect('positive_integer.db')
-            cursor = conn.cursor()
-            all_players = cursor.execute('SELECT * FROM players_data;').fetchall()
-            all_players_name = cursor.execute('SELECT player_name FROM players_data;').fetchall()
-            players = ""
-            for i in all_players_name:
-                players += i[0] + "|"
-            minimum = min(all_players, key = lambda t: t[1])
-
+    if request.method == "POST":
+        conn = sqlite3.connect('positive_integer.db')
+        cursor = conn.cursor()
+        all_players = cursor.execute('SELECT * FROM players_data;').fetchall()
+        all_players_name = cursor.execute('SELECT player_name FROM players_data;').fetchall()
+        players = ""
+        for i in all_players_name:
+            players += i[0] + ","
+        try:
+            minimum = min(all_players, key=lambda t: t[1])
             session['round'] += 1
             session.pop('_flashes', None)
 
             conn = sqlite3.connect('positive_integer.db')
             cursor = conn.cursor()
-            sqlite_insert_query = f"INSERT INTO rounds (round_number,round_result,winner,participants) " \
-                                  f"VALUES  {session['round'], minimum[0], minimum[1], players};"
-            count_1 = cursor.execute(sqlite_insert_query)
-            sqlite_insert_query = f"DELETE FROM players_data;"
-            count_2 = cursor.execute(sqlite_insert_query)
+
+            round_num = 'Round number: ' + str(session['round'])
+            name = 'Winner: ' + str(minimum[0])
+            number = 'Winning number: ' + str(minimum[1])
+            players = 'Players in the round: ' + players
+
+            query_rounds = f"INSERT INTO rounds (round_number,round_result,winner,participants) " \
+                           f"VALUES  {round_num, name, number, players};"
+            insert_rounds = cursor.execute(query_rounds)
+            query_delete = f"DELETE FROM players_data;"
+            delete_players_data = cursor.execute(query_delete)
             conn.commit()
             cursor.close()
 
             return f"{minimum[0]} is the winner, and the number is {minimum[1]}!"
 
-@app.route("/results", methods=["GET",'POST'])
+        except:
+            flash("No players added!")
+            print("No players added!")
+            return redirect('/positive_integer/v1/games/positiveInteger')
+
+
+@app.route("/results", methods=["GET", "POST"])
 def get_results():
     if request.method == "POST":
         conn = sqlite3.connect('positive_integer.db')
@@ -77,4 +90,6 @@ def get_results():
         result = jsonify(list(rounds))
         cursor.close()
     return result
+
+
 app.run()
