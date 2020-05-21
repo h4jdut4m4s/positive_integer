@@ -11,7 +11,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 
 @app.route("/positive_integer/v1/games/positiveInteger")
 def index():
-    if not session['round']:
+    if not session.get('round', 0):
         session['round'] = 0
     conn = sqlite3.connect('positive_integer.db')
     cur = conn.cursor()
